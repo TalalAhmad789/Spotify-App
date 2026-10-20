@@ -9,6 +9,7 @@ import {
     FiPause,
 } from "react-icons/fi";
 import { HiOutlineGlobeAlt } from "react-icons/hi";
+
 const footerLinks = [
     "Legal",
     "Safety & Privacy Center",
@@ -18,87 +19,11 @@ const footerLinks = [
     "Accessibility",
     "Cookies",
 ];
+
 import { usePlayer } from "@/contexts/PlayerContext";
 
 const Sidebar = () => {
-    const { currentSong, setCurrentSong, nextSong, setNextSong, prevSong, setPrevSong } = usePlayer();
-    const audioRef = useRef(null);
-    const [librarySongs, setLibrarySongs] = useState([
-        {
-            id: 1,
-            title: "Elektronomia - Sky High Progressive House NCS",
-            artist: "Talal Ahmad",
-            audio: "/songs/Elektronomia - Sky High Progressive House NCS - Copyright Free Music.mp3",
-            isPlaying: false
-        },
-        {
-            id: 2,
-            title: "Lost Sky - Fearless pt.II (feat. Chris Linton) Trap NCS",
-            artist: "Absar Ahmad",
-            audio: "/songs/Lost Sky - Fearless pt.II (feat. Chris Linton) Trap NCS - Copyright Free Music.mp3",
-            isPlaying: false
-        },
-        {
-            id: 3,
-            title: "Warriyo - Mortals (feat. Laura Brehm) Future Trap NCS",
-            artist: "Zikria Ahmad",
-            audio: "/songs/Warriyo - Mortals (feat. Laura Brehm) Future Trap NCS - Copyright Free Music.mp3",
-            isPlaying: false
-        },
-    ])
-
-    const handlePlayingSong = (songId) => {
-        const targetSong = librarySongs.find((song) => song.id === songId);
-        if (!targetSong) return;
-
-        if (targetSong.isPlaying) {
-            if (audioRef.current) {
-                audioRef.current.pause();
-            }
-
-            setLibrarySongs((prev) =>
-                prev.map((s) => (s.id === songId ? { ...s, isPlaying: false } : s))
-            );
-            setCurrentPlayingId(null);
-            return;
-        }
-
-        if (audioRef.current) {
-            audioRef.current.pause();
-        }
-
-        const newAudio = new Audio(targetSong.audio);
-        audioRef.current = newAudio;
-
-        newAudio.play().catch((err) => {
-            console.error("Audio playback error:", err);
-        });
-
-        newAudio.onended = () => {
-            setLibrarySongs((prev) =>
-                prev.map((s) => ({ ...s, isPlaying: false }))
-            );
-            setCurrentPlayingId(null);
-        };
-
-        setCurrentPlayingId(songId);
-        setLibrarySongs((prevSongs) =>
-            prevSongs.map((song) => ({
-                ...song,
-                isPlaying: song.id === songId,
-            }))
-        );
-    };
-
-    useEffect(() => {
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause()
-                audioRef.current = null
-            }
-        }
-    }, [])
-
+    const { librarySongs, currentSong, isPlaying, playSong } = usePlayer();
 
     const isSongs = false;
 
@@ -121,18 +46,19 @@ const Sidebar = () => {
 
                 <div className="overflow-y-auto flex-1 min-h-0 flex flex-col gap-y-6">
 
-                    {librarySongs.length > 0 ? librarySongs.map((song, index) => {
+                    {librarySongs.map((song) => {
+                        const songIsPlaying =
+                            currentSong?.id === song.id && isPlaying;
+
                         return (
-                            <div key={index} className="bg-[#181818] border-t border-[#282828] px-4 py-3 w-full shrink-0">
-
+                            <div
+                                key={song.id}
+                                className="bg-[#181818] border-t border-[#282828] px-4 py-3 w-full shrink-0"
+                            >
                                 <div className="flex items-center justify-between">
-
                                     <div className="flex items-center gap-3 min-w-0 flex-1">
-
                                         <div className="w-12 h-12 bg-[#282828] rounded-md flex items-center justify-center shrink-0">
-                                            <span className="text-xl">
-                                                🎵
-                                            </span>
+                                            <span className="text-xl">🎵</span>
                                         </div>
 
                                         <div className="min-w-0">
@@ -144,16 +70,15 @@ const Sidebar = () => {
                                                 {song.artist}
                                             </p>
                                         </div>
-
                                     </div>
 
                                     <div className="flex items-center justify-end ml-4">
                                         <button
-                                            aria-label={song.isPlaying ? "Pause" : "Play"}
-                                            onClick={() => handlePlayingSong(song.id)}
+                                            aria-label={songIsPlaying ? "Pause" : "Play"}
+                                            onClick={() => playSong(song)}
                                             className="bg-white text-black w-9 h-9 rounded-full flex items-center justify-center hover:scale-105 transition-transform"
                                         >
-                                            {song.isPlaying ? (
+                                            {songIsPlaying ? (
                                                 <FiPause className="w-4 h-4 fill-current" />
                                             ) : (
                                                 <FiPlay className="w-4 h-4 fill-current ml-0.5" />
@@ -162,40 +87,8 @@ const Sidebar = () => {
                                     </div>
                                 </div>
                             </div>
-                        )
-                    }) :
-                        <>
-                            <div className="bg-[#1f1f1f] rounded-lg p-4 mx-3">
-                                <h3 className="font-bold text-sm mb-1">
-                                    Create your first playlist
-                                </h3>
-
-                                <p className="text-[#b8b8b8] text-sm mb-4">
-                                    It&apos;s easy, we&apos;ll help you
-                                </p>
-
-                                <button className="bg-white text-black text-sm font-bold rounded-full px-4 py-2 hover:scale-105 transition-transform">
-                                    Create playlist
-                                </button>
-                            </div>
-
-                            <div className="bg-[#1f1f1f] rounded-lg p-4 mx-3">
-                                <h3 className="font-bold text-sm mb-1">
-                                    Let&apos;s find some podcasts to follow
-                                </h3>
-
-                                <p className="text-[#b8b8b8] text-sm mb-4">
-                                    We&apos;ll keep you updated on new episodes
-                                </p>
-
-                                <button className="bg-white text-black text-sm font-bold rounded-full px-4 py-2 hover:scale-105 transition-transform">
-                                    Browse podcasts
-                                </button>
-                            </div>
-                        </>
-                    }
-
-
+                        );
+                    })}
 
                 </div>
             </div>
